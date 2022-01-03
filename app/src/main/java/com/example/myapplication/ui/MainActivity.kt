@@ -12,7 +12,6 @@ import com.example.myapplication.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private var stepsCountforDate by
     private lateinit var binding: ActivityMainBinding
     val requestPermissionLauncher =
         registerForActivityResult(
