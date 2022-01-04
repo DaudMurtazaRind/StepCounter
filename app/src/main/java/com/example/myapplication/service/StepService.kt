@@ -113,6 +113,7 @@ class StepService: Service(), SensorEventListener {
                     save()
                     isNewDay()
                 } else if (Intent.ACTION_TIME_CHANGED == action) {
+                    save()
                     isCall()
                     isNewDay()
                 } else if (Intent.ACTION_TIME_TICK == action) {
