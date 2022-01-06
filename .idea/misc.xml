@@ -3,10 +3,20 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.27708333333333335" />
         <entry key="app/src/main/res/drawable/circle.xml" value="0.278125" />
+        <entry key="app/src/main/res/drawable/ic_images.xml" value="0.278125" />
+        <entry key="app/src/main/res/drawable/ic_images_1.xml" value="0.278125" />
         <entry key="app/src/main/res/layout/activity_history.xml" value="0.26197916666666665" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.24048913043478262" />
+        <entry key="app/src/main/res/layout/fragment_history.xml" value="0.26197916666666665" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.26197916666666665" />
+        <entry key="app/src/main/res/layout/fragment_settings.xml" value="0.26197916666666665" />
+        <entry key="app/src/main/res/layout/notification_collapsed.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/notification_layout.xml" value="0.13489583333333333" />
         <entry key="app/src/main/res/layout/stepsitemview.xml" value="0.26197916666666665" />
+        <entry key="app/src/main/res/menu/bottom_menu.xml" value="0.26197916666666665" />
       </map>
     </option>
   </component>

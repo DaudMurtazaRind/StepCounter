@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -15,6 +16,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.CountDownTimer
 import android.os.IBinder
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import com.example.myapplication.R
 import com.example.myapplication.UpdateUiCallBack
@@ -32,7 +34,7 @@ import java.util.*
 
 private const val CHANNEL_ID = "200"
 
-class StepService: Service(), SensorEventListener {
+class StepService : Service(), SensorEventListener {
 
     lateinit var db: DatabaseClient
     private var CURRENT_DATE = ""
@@ -67,15 +69,19 @@ class StepService: Service(), SensorEventListener {
         val hangIntent = Intent(this, MainActivity::class.java)
         val hangPendingIntent =
             PendingIntent.getActivity(this, 0, hangIntent, FLAG_UPDATE_CURRENT)
+        val remoteView = RemoteViews(this.packageName, R.layout.notification_collapsed)
+        remoteView.setTextViewText(
+            R.id.app_Name,
+            this.packageName.split(".").last().toString().capitalize()
+        )
+        remoteView.setTextViewText(R.id.txt_Steps, this.CURRENT_STEP.toString())
         mBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-        mBuilder?.setContentTitle(resources.getString(R.string.app_name))
-            ?.setContentText("Steps taken $CURRENT_STEP")
-            ?.setContentIntent(hangPendingIntent)
-            ?.setWhen(System.currentTimeMillis())
+        mBuilder?.setCustomContentView(remoteView)
             ?.setPriority(NotificationCompat.PRIORITY_DEFAULT)
             ?.setAutoCancel(false)
             ?.setOngoing(true)
-            ?.setSmallIcon(R.mipmap.ic_launcher_round)
+            ?.setSmallIcon(R.drawable.ic_images_1)
+            ?.setColor(255)
         val notification: Notification? = mBuilder?.build()
         mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         startForeground(notifyId_Step, notification)
@@ -128,6 +134,7 @@ class StepService: Service(), SensorEventListener {
     private fun isNewDay() {
         val time = "00:00"
         if (time == SimpleDateFormat("HH:mm").format(Date()) || CURRENT_DATE != getTodayDate()) {
+            CURRENT_STEP = 0
             initTodayData()
         }
     }
@@ -136,7 +143,7 @@ class StepService: Service(), SensorEventListener {
         val time =
             getSharedPreferences("share_date", MODE_MULTI_PROCESS).getString("achieveTime", "21:00")
         val plan =
-            getSharedPreferences("share_date", MODE_MULTI_PROCESS).getString("planWalk_QTY", "7000")
+            getSharedPreferences("share_date", MODE_MULTI_PROCESS).getString("planWalk_QTY", "0")
         val remind = getSharedPreferences("share_date", MODE_MULTI_PROCESS).getString("remind", "1")
         Logger.d(
             "time=" + time + "\n" +
@@ -152,13 +159,17 @@ class StepService: Service(), SensorEventListener {
     }
 
     private fun updateNotification() {
+        val remoteView = RemoteViews(this.packageName, R.layout.notification_collapsed)
+        remoteView.setTextViewText(
+            R.id.app_Name,
+            this.packageName.split(".").last().toString().capitalize()
+        )
+        remoteView.setTextViewText(R.id.txt_Steps, this.CURRENT_STEP.toString())
         val hangIntent = Intent(this, MainActivity::class.java)
         val hangPendingIntent =
             PendingIntent.getActivity(this, 0, hangIntent, FLAG_UPDATE_CURRENT)
         val notification: Notification? =
-            mBuilder?.setContentTitle(resources.getString(R.string.app_name))
-                ?.setContentText("Steps taken $CURRENT_STEP")
-                ?.setWhen(System.currentTimeMillis())
+            mBuilder?.setCustomContentView(remoteView)
                 ?.setContentIntent(hangPendingIntent)
                 ?.build()
         mNotificationManager!!.notify(notifyId_Step, notification)
@@ -272,11 +283,16 @@ class StepService: Service(), SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     private fun save() {
-        val tempStep = CURRENT_STEP
-        db = DatabaseClient.getInstance(applicationContext)
-        var steps = Steps(0, tempStep, CURRENT_DATE)
         CoroutineScope(IO).launch {
-            db.appDatabase.stepsDao().insert(steps)
+            db = DatabaseClient.getInstance(applicationContext)
+            val step = db.appDatabase.stepsDao().getSingleStepsRecord(CURRENT_DATE)
+            val tempStep = CURRENT_STEP
+            if (step == null) {
+                var steps = Steps(0, tempStep, CURRENT_DATE)
+                db.appDatabase.stepsDao().insert(steps)
+            } else{
+                db.appDatabase.stepsDao().update(CURRENT_STEP + step.steps, CURRENT_DATE)
+            }
         }
     }
 
